@@ -1,0 +1,68 @@
+---
+import { getCollection } from "astro:content";
+import BaseLayout from "../../layouts/BaseLayout.astro";
+
+const episodes = (await getCollection("podcast", ({ data }) => !data.draft)).sort(
+  (a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf()
+);
+
+const episodePath = (ep: (typeof episodes)[number]) =>
+  `/podcast/${(ep.slug ?? ep.id).replace(/\.md$/, "")}/`;
+
+const seriesLabels: Record<string, string> = {
+  research: "Research Digest",
+  essay: "Essay",
+  making: "Making",
+  dance: "Dance Notes",
+  conversation: "Conversation",
+};
+
+const seriesLabel = (s: string) => seriesLabels[s] ?? s;
+
+const formatDate = (date: Date) =>
+  new Intl.DateTimeFormat("en-US", {
+    year: "numeric",
+    month: "short",
+    day: "numeric"
+  }).format(date);
+---
+
+<BaseLayout title="Podcast | Lumen Radley" description="Audio essays, research digests, experiments, and conversations.">
+  <section class="hero">
+    <h2>Podcast</h2>
+    <p>
+      Audio essays, research digests, experiments, and conversations.
+      Subscribe in your favorite podcast app or via RSS.
+    </p>
+    <p class="hero-links">
+      <a href="/podcast/feed.xml">Podcast RSS</a>
+      <span aria-hidden="true">-</span>
+      <a href="https://lumenradley.substack.com" target="_blank" rel="noopener noreferrer">Newsletter</a>
+    </p>
+  </section>
+
+  {episodes.length > 0 ? (
+    <>
+      <h2 class="section-title">Episodes</h2>
+      <div class="list">
+        {episodes.map((ep) => (
+          <article class="card">
+            <h3>
+              <a href={episodePath(ep)}>{ep.data.title}</a>
+            </h3>
+            <p>{ep.data.description}</p>
+            <div class="meta">
+              {formatDate(ep.data.pubDate)}
+              <span aria-hidden="true"> · </span>
+              {ep.data.duration}
+              <span aria-hidden="true"> · </span>
+              {seriesLabel(ep.data.series)}
+            </div>
+          </article>
+        ))}
+      </div>
+    </>
+  ) : (
+    <p class="section-title" style="color: var(--muted);">Episodes coming soon.</p>
+  )}
+</BaseLayout>

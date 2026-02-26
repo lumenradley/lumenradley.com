@@ -1,0 +1,73 @@
+---
+import { getCollection } from "astro:content";
+import BaseLayout from "../../layouts/BaseLayout.astro";
+
+export async function getStaticPaths() {
+  const episodes = await getCollection("podcast", ({ data }) => !data.draft);
+  return episodes.map((ep) => ({
+    params: { slug: (ep.slug ?? ep.id).replace(/\.md$/, "") },
+    props: { ep }
+  }));
+}
+
+const { ep } = Astro.props;
+const { Content } = await ep.render();
+
+const seriesLabels: Record<string, string> = {
+  research: "Research Digest",
+  essay: "Essay",
+  making: "Making",
+  dance: "Dance Notes",
+  conversation: "Conversation",
+};
+
+const seriesLabel = (s: string) => seriesLabels[s] ?? s;
+
+const formatDate = (date: Date) =>
+  new Intl.DateTimeFormat("en-US", {
+    year: "numeric",
+    month: "long",
+    day: "numeric"
+  }).format(date);
+---
+
+<BaseLayout title={`${ep.data.title} | Lumen Radley`} description={ep.data.description}>
+  <article class="prose">
+    <p class="meta">
+      {formatDate(ep.data.pubDate)}
+      <span aria-hidden="true"> · </span>
+      {ep.data.duration}
+      <span aria-hidden="true"> · </span>
+      {seriesLabel(ep.data.series)}
+    </p>
+    <h1>{ep.data.title}</h1>
+    <p><em>{ep.data.description}</em></p>
+
+    <audio id="player" controls preload="none" style="width: 100%; margin: 1rem 0;">
+      <source src={ep.data.audioUrl} type="audio/mpeg" />
+    </audio>
+
+    <Content />
+  </article>
+
+  <script>
+    document.querySelectorAll('.prose li').forEach(li => {
+      const match = li.textContent?.match(/^(\d{1,3}):(\d{2})\s/);
+      if (!match) return;
+      const seconds = parseInt(match[1]) * 60 + parseInt(match[2]);
+      const link = document.createElement('a');
+      link.href = '#';
+      link.innerHTML = li.innerHTML;
+      link.style.textDecoration = 'none';
+      link.style.color = 'inherit';
+      link.addEventListener('click', (e) => {
+        e.preventDefault();
+        const audio = document.getElementById('player') as HTMLAudioElement;
+        audio.currentTime = seconds;
+        audio.play();
+      });
+      li.innerHTML = '';
+      li.appendChild(link);
+    });
+  </script>
+</BaseLayout>

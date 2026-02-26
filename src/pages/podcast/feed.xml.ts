@@ -1,0 +1,91 @@
+import type { APIContext } from "astro";
+import { getCollection } from "astro:content";
+
+const OP3_PREFIX = "https://op3.dev/e";
+
+const SERIES_LABELS: Record<string, string> = {
+  research: "Research Digest",
+  essay: "Essay",
+  making: "Making",
+  dance: "Dance Notes",
+  conversation: "Conversation",
+};
+
+function escapeXml(str: string): string {
+  return str
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&apos;");
+}
+
+function toRfc2822(date: Date): string {
+  return date.toUTCString();
+}
+
+export async function GET(context: APIContext) {
+  const site = context.site!.href.replace(/\/$/, "");
+  const episodes = (await getCollection("podcast", ({ data }) => !data.draft)).sort(
+    (a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf()
+  );
+
+  const episodePath = (ep: (typeof episodes)[number]) =>
+    `${site}/podcast/${(ep.slug ?? ep.id).replace(/\.md$/, "")}/`;
+
+  const items = episodes
+    .map((ep) => {
+      const d = ep.data;
+      const link = episodePath(ep);
+      const guid = link;
+      const enclosureUrl = `${OP3_PREFIX}/${d.audioUrl}`;
+
+      return `    <item>
+      <title>${escapeXml(d.title)}</title>
+      <description>${escapeXml(d.description)}</description>
+      <link>${link}</link>
+      <guid isPermaLink="true">${guid}</guid>
+      <pubDate>${toRfc2822(d.pubDate)}</pubDate>
+      <enclosure url="${escapeXml(enclosureUrl)}" length="${d.audioSize}" type="audio/mpeg" />
+      <itunes:title>${escapeXml(d.title)}</itunes:title>
+      <itunes:summary>${escapeXml(d.description)}</itunes:summary>
+      <itunes:duration>${d.duration}</itunes:duration>
+      <itunes:explicit>${d.explicit ? "true" : "false"}</itunes:explicit>
+      <itunes:keywords>${escapeXml(SERIES_LABELS[d.series] ?? d.series)}</itunes:keywords>${d.episodeNumber != null ? `\n      <itunes:episode>${d.episodeNumber}</itunes:episode>` : ""}
+    </item>`;
+    })
+    .join("\n");
+
+  const xml = `<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0"
+  xmlns:itunes="http://www.itunes.com/dtds/podcast-1.0.dtd"
+  xmlns:podcast="https://podcastindex.org/namespace/1.0"
+  xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Lumen Radley</title>
+    <link>${site}</link>
+    <description>A podcast about ideas, systems, inner life, technology, and making things. Some episodes are research digests. Some are essays. Some are conversations. All of them are attempts to understand something worth understanding.</description>
+    <language>en</language>
+    <atom:link href="${site}/podcast/feed.xml" rel="self" type="application/rss+xml" />
+
+    <itunes:author>Lumen Radley</itunes:author>
+    <itunes:owner>
+      <itunes:name>Lumen Radley</itunes:name>
+      <itunes:email>podcast@lumenradley.com</itunes:email>
+    </itunes:owner>
+    <itunes:image href="${site}/podcast-artwork.jpg" />
+    <itunes:category text="Education">
+      <itunes:category text="Self-Improvement" />
+    </itunes:category>
+    <itunes:category text="Technology" />
+    <itunes:explicit>false</itunes:explicit>
+    <itunes:type>episodic</itunes:type>
+
+${items}
+  </channel>
+</rss>`;
+
+  return new Response(xml, {
+    headers: { "Content-Type": "application/rss+xml; charset=utf-8" }
+  });
+}
