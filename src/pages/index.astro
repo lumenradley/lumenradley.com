@@ -1,0 +1,49 @@
+---
+import { getCollection } from "astro:content";
+import BaseLayout from "../layouts/BaseLayout.astro";
+
+const posts = (await getCollection("blog", ({ data }) => !data.draft))
+  .sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf())
+  .slice(0, 6);
+
+const postPath = (post: (typeof posts)[number]) => `/blog/${(post.slug ?? post.id).replace(/\.md$/, "")}/`;
+
+const formatDate = (date: Date) =>
+  new Intl.DateTimeFormat("en-US", {
+    year: "numeric",
+    month: "short",
+    day: "numeric"
+  }).format(date);
+---
+
+<BaseLayout title="Lumen Radley | Blog" description="A personal blog about code, ideas, and experiments.">
+  <section class="hero">
+    <h2>Write once, publish everywhere.</h2>
+    <p>
+      This site is the canonical home for long-form posts. You can syndicate selected posts to Substack, social media,
+      and podcast descriptions while keeping your archive in one place.
+    </p>
+    <p class="hero-links">
+      <a href="https://lumenradley.substack.com" target="_blank" rel="noopener noreferrer">Substack</a>
+      <span aria-hidden="true">-</span>
+      <a href="/rss.xml">RSS</a>
+      <span aria-hidden="true">-</span>
+      <a href="/podcast">Podcast</a>
+    </p>
+  </section>
+
+  <h2 class="section-title">Recent Posts</h2>
+  <div class="list">
+    {
+      posts.map((post) => (
+        <article class="card">
+          <h3>
+            <a href={postPath(post)}>{post.data.title}</a>
+          </h3>
+          <p>{post.data.description}</p>
+          <div class="meta">{formatDate(post.data.pubDate)}</div>
+        </article>
+      ))
+    }
+  </div>
+</BaseLayout>

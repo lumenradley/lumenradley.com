@@ -1,0 +1,34 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+---
+
+<BaseLayout title="Podcast | Lumen Radley" description="Podcast links and episode feed.">
+  <section class="hero">
+    <h2>Podcast</h2>
+    <p>
+      Start with an external podcast host for audio storage and analytics, then surface episodes here. This keeps your
+      website fast and your audio pipeline reliable.
+    </p>
+    <p class="hero-links">
+      <a href="https://lumenradley.substack.com" target="_blank" rel="noopener noreferrer">Substack</a>
+      <span aria-hidden="true">-</span>
+      <a href="/rss.xml">Site RSS</a>
+    </p>
+  </section>
+
+  <h2 class="section-title">Suggested Setup</h2>
+  <div class="list">
+    <article class="card">
+      <h3>1. Audio Host</h3>
+      <p>Use Transistor, Buzzsprout, or Spotify for Podcasters for media hosting and podcast distribution.</p>
+    </article>
+    <article class="card">
+      <h3>2. Canonical Website</h3>
+      <p>Publish episode notes in this blog and link to the external audio feed.</p>
+    </article>
+    <article class="card">
+      <h3>3. Cross-linking</h3>
+      <p>Embed podcast players in posts and include https://lumenradley.com in every episode description.</p>
+    </article>
+  </div>
+</BaseLayout>
