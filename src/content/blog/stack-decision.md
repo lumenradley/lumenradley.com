@@ -5,6 +5,7 @@ pubDate: 2026-02-19
 tags:
   - architecture
   - astro
+draft: true
 ---
 
 The first version optimizes for speed and ownership:

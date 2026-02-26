@@ -5,6 +5,7 @@ pubDate: 2026-02-19
 tags:
   - meta
   - writing
+draft: true
 ---
 
 I wanted a home base that I own end-to-end.
