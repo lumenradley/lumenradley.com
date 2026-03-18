@@ -1,5 +1,6 @@
 import type { APIContext } from "astro";
 import { getCollection } from "astro:content";
+import { escapeXml, toRfc2822, mdToHtml } from "../../lib/feed-utils";
 
 const OP3_PREFIX = "https://op3.dev/e";
 
@@ -11,19 +12,6 @@ const SERIES_LABELS: Record<string, string> = {
   conversation: "Conversation",
 };
 
-function escapeXml(str: string): string {
-  return str
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;")
-    .replace(/'/g, "&apos;");
-}
-
-function toRfc2822(date: Date): string {
-  return date.toUTCString();
-}
-
 export async function GET(context: APIContext) {
   const site = context.site!.href.replace(/\/$/, "");
   const episodes = (await getCollection("podcast", ({ data }) => !data.draft)).sort(
@@ -33,16 +21,20 @@ export async function GET(context: APIContext) {
   const episodePath = (ep: (typeof episodes)[number]) =>
     `${site}/podcast/${(ep.slug ?? ep.id).replace(/\.md$/, "")}/`;
 
+  const artworkUrl = `${site}/podcast-artwork.jpg`;
+
   const items = episodes
     .map((ep) => {
       const d = ep.data;
       const link = episodePath(ep);
       const guid = link;
       const enclosureUrl = `${OP3_PREFIX}/${d.audioUrl}`;
+      const showNotesHtml = ep.body ? mdToHtml(ep.body) : "";
 
       return `    <item>
       <title>${escapeXml(d.title)}</title>
       <description>${escapeXml(d.description)}</description>
+      <content:encoded><![CDATA[${showNotesHtml}]]></content:encoded>
       <link>${link}</link>
       <guid isPermaLink="true">${guid}</guid>
       <pubDate>${toRfc2822(d.pubDate)}</pubDate>
@@ -50,6 +42,7 @@ export async function GET(context: APIContext) {
       <itunes:title>${escapeXml(d.title)}</itunes:title>
       <itunes:summary>${escapeXml(d.description)}</itunes:summary>
       <itunes:duration>${d.duration}</itunes:duration>
+      <itunes:image href="${artworkUrl}" />
       <itunes:explicit>${d.explicit ? "true" : "false"}</itunes:explicit>
       <itunes:keywords>${escapeXml(SERIES_LABELS[d.series] ?? d.series)}</itunes:keywords>${d.episodeNumber != null ? `\n      <itunes:episode>${d.episodeNumber}</itunes:episode>` : ""}
     </item>`;
@@ -59,6 +52,7 @@ export async function GET(context: APIContext) {
   const xml = `<?xml version="1.0" encoding="UTF-8"?>
 <rss version="2.0"
   xmlns:itunes="http://www.itunes.com/dtds/podcast-1.0.dtd"
+  xmlns:content="http://purl.org/rss/1.0/modules/content/"
   xmlns:podcast="https://podcastindex.org/namespace/1.0"
   xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
