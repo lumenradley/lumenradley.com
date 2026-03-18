@@ -10,7 +10,7 @@ export async function GET(context) {
 
   return rss({
     title: "Lumen Radley",
-    description: "Posts about software, writing, and experiments.",
+    description: "Research-driven essays on AI, software, cognition, and modern life.",
     site: context.site,
     items: posts.map((post) => ({
       title: post.data.title,

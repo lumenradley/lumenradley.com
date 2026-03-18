@@ -2,9 +2,9 @@
 title: "Essay: The Great Noosphere Navigator"
 description: "A mental model for moving through the landscape of all human knowledge. Sixteen parts installing a cognitive instrument -- from Vernadsky's coinage through Popper's World Three to Indra's Net."
 pubDate: 2026-03-08
-duration: "1:51:27"
+duration: "1:51:20"
 audioUrl: "https://media.lumenradley.com/episodes/the-great-noosphere-navigator.mp3"
-audioSize: 108111108
+audioSize: 108003556
 series: "essay"
 episodeNumber: 1
 explicit: false
@@ -28,7 +28,7 @@ The philosophical spine runs Vernadsky, Popper's World Three, Indra's Net -- thr
 
 ## Chapters
 
-- 00:14 -- The Great Noosphere Navigator (Introduction)
+- 00:00 -- The Great Noosphere Navigator (Introduction)
 - 00:22 -- Part One: The Invitation
 - 02:34 -- Part Two: The Birth of a Word
 - 11:10 -- Part Three: The Shape of Idea-Space

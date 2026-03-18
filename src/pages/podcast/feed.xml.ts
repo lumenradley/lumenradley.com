@@ -64,10 +64,13 @@ export async function GET(context: APIContext) {
   <channel>
     <title>Lumen Radley</title>
     <link>${site}</link>
-    <description>A podcast about ideas, systems, inner life, technology, and making things. Some episodes are research digests. Some are essays. Some are conversations. All of them are attempts to understand something worth understanding.</description>
+    <description>Long-form audio essays and research field notes on AI, software, cognition, and modern life. Each piece aims to leave you with a sharper model of something that matters.</description>
     <language>en</language>
+    <copyright>&#xA9; 2026 Lumen Radley</copyright>
     <atom:link href="${site}/podcast/feed.xml" rel="self" type="application/rss+xml" />
 
+    <itunes:subtitle>Research-driven audio essays on AI, cognition, and modern life</itunes:subtitle>
+    <itunes:summary>Long-form audio essays and field notes for people trying to think clearly. Independent, calm, and model-driven.</itunes:summary>
     <itunes:author>Lumen Radley</itunes:author>
     <itunes:owner>
       <itunes:name>Lumen Radley</itunes:name>
